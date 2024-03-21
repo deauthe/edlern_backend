@@ -1,25 +1,37 @@
-import nodeMailer from "nodemailer";
+import nodeMailer, { TransportOptions } from "nodemailer";
+import { MailOptions } from "nodemailer/lib/json-transport";
 import { text } from "stream/consumers";
 
-export const sendMail = ({ recieverEmail }: { recieverEmail: string }) => {
-	const mailOptions = {
+const transporter = nodeMailer.createTransport({
+	service: "gmail",
+	host: "smtp.gmail.com",
+	port: 465,
+	secure: true,
+	auth: {
+		user: process.env.MAIL_USER,
+		pass: process.env.MAIL_PASSWORD,
+	},
+});
+
+export const sendMail = async ({
+	recieverEmail,
+}: {
+	recieverEmail: string;
+}) => {
+	const mailOptions: MailOptions = {
 		from: {
 			name: "Edlern Support",
-			address: process.env.MAIL_USER,
+			address: process.env.MAIL_USER!,
 		},
 		to: [recieverEmail],
-		subject: "edlern_mail",
+		subject: "Edlern Support",
 		text: "Hello world",
 		html: "<b>hahahahahahahah</b>",
 	};
-	nodeMailer.createTransport({
-		service: "gmail",
-		host: "smtp.gmail.com",
-		port: 587,
-		secure: false,
-		auth: {
-			user: process.env.MAIL_USER,
-			pass: process.env.MAIL_PASSWORD,
-		},
-	});
+
+	try {
+		await transporter.sendMail(mailOptions);
+	} catch (error) {
+		console.error(error);
+	}
 };
